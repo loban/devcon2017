@@ -41,7 +41,7 @@ function error(label, dump) {
 }
 
 /**
- * Asynchronous-2 using promises
+ * Asynchronous-3 using async/await
  */
 async function asyncTask3() {
   try {
@@ -55,7 +55,6 @@ async function asyncTask3() {
 
     let httpContent = await Promise.all(jsonContent.map(async item => {
       debug('loading item', item.url);
-
       let httpResponse = await request.get(item.url);
       return httpResponse.substr(item.position, item.length);
     }));
