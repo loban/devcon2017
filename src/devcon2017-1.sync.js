@@ -55,8 +55,7 @@ function syncTask() {
 
     let httpContent = jsonContent.map(function (item) {
       debug('loading item', item.url);
-
-      let httpResponse = request.get(item.url).getBody('utf-8');
+      let httpResponse = request('GET', item.url).getBody('utf-8');
       return httpResponse.substr(item.position, item.length);
     });
 

@@ -55,7 +55,7 @@ function asyncTask2() {
     .then(jsonContent => {
       debug('jsonContent', jsonContent);
 
-      return Promise.all(jsonContent.map(function (item) {
+      return Promise.all(jsonContent.map(item => {
         debug('loading item', item.url);
         return request.get(item.url)
           .then(httpResponse => {
