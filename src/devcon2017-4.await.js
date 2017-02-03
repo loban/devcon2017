@@ -53,11 +53,13 @@ async function asyncTask3() {
 
     debug('jsonContent', jsonContent);
 
-    let httpContent = await Promise.all(jsonContent.map(async item => {
-      debug('loading item', item.url);
-      let httpResponse = await request.get(item.url);
-      return httpResponse.substr(item.position, item.length);
-    }));
+    let httpContent = await Promise.all(
+      jsonContent.map(async item => {
+        debug('loading item', item);
+        let httpResponse = await request.get(item);
+        return httpResponse.substr(0, 10);
+      })
+    );
 
     debug('httpContent', httpContent);
 

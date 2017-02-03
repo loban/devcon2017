@@ -61,39 +61,36 @@ function asyncTask1(callback) {
     }
     debug('jsonContent', jsonContent);
 
-    function buildHttpContent(items, results, callback2) {
-      if (items.length == 0)
-        return callback2(results);
-
-      let item = items.pop();
-      debug('loading item', item.url);
-
-      request.get(item.url, function (httpError, httpResponse, httpBody) {
+    let httpContent = [];
+    let count = 0;
+    jsonContent.forEach(function (item) {
+      debug('loading item', item);
+      request.get(item, function (httpError, httpResponse, httpBody) {
         if (httpError) {
           error('httpError', httpError);
           return callback();
         }
-        results.push(httpBody.substr(item.position, item.length));
-        buildHttpContent(items, results, callback2);
-      });
-    }
+        httpContent.push(httpBody.substr(0, 10));
+        count++;
 
-    buildHttpContent(jsonContent, [], function (httpContent) {
-      debug('httpContent', httpContent);
+        if (count == jsonContent.length) {
+          debug('httpContent', httpContent);
 
-      mongodb.MongoClient.connect('mongodb://127.0.0.1:27017/local', function (dbError, db) {
-        if (dbError) {
-          error('dbError', dbError);
-          return callback();
+          mongodb.MongoClient.connect('mongodb://127.0.0.1:27017/local', function (dbError, db) {
+            if (dbError) {
+              error('dbError', dbError);
+              return callback();
+            }
+            db.collection('values').insertOne({value: httpContent}, function (dbError, dbContent) {
+              if (dbError) {
+                error('dbError', dbError);
+                return callback();
+              }
+              debug('dbContent', dbContent.ops);
+              return callback();
+            })
+          });
         }
-        db.collection('values').insertOne({value: httpContent}, function (dbError, dbContent) {
-          if (dbError) {
-            error('dbError', dbError);
-            return callback();
-          }
-          debug('dbContent', dbContent.ops);
-          return callback();
-        })
       });
     });
   });

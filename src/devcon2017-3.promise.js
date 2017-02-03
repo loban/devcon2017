@@ -52,17 +52,19 @@ function asyncTask2() {
 
       return JSON.parse(fileContent);
     })
+
     .then(jsonContent => {
       debug('jsonContent', jsonContent);
 
       return Promise.all(jsonContent.map(item => {
-        debug('loading item', item.url);
-        return request.get(item.url)
+        debug('loading item', item);
+        return request.get(item)
           .then(httpResponse => {
-            return httpResponse.substr(item.position, item.length);
+            return httpResponse.substr(0, 10);
           });
       }));
     })
+
     .then(httpContent => {
       debug('httpContent', httpContent);
 
@@ -73,9 +75,11 @@ function asyncTask2() {
           });
         });
     })
+
     .then(dbContent => {
       debug('dbContent', dbContent.ops);
     })
+
     .catch(anyError => {
       error('anyError', anyError);
     });
