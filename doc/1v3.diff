@@ -1,0 +1,128 @@
+--- devcon2017-1.sync.js
++++ devcon2017-3.promise.js
+@@ -1,1 +1,1 @@
+ 'use strict';
+ 
+ //
+ // Imports
+ //
+ 
+-const Fiber = require('fibers');
++const Promise = require('bluebird');
+ 
+ const colors = require('colors');
+-const fs = require('fs');
+-const request = require('sync-request');
+-const mongodb = require('mongo-sync');
++const fs = Promise.promisifyAll(require('fs'));
++const request = require('request-promise');
++const mongodb = require('mongodb');
+ 
+ //
+ // Main
+ //
+-
+ function main() {
+-    console.log('-----------'.green);
+-    console.log('SYNCHRONOUS'.green);
+-    console.log('-----------'.green);
+-
+-    console.time('SYNCHRONOUS'.yellow);
+-    Fiber(syncTask).run();
+-    console.timeEnd('SYNCHRONOUS'.yellow);
++    console.log('--------------'.green);
++    console.log('ASYNCHRONOUS-2'.green);
++    console.log('--------------'.green);
++
++    console.time('ASYNCHRONOUS-2'.yellow);
++    asyncTask2()
++        .then(() => {
++            console.timeEnd('ASYNCHRONOUS-2'.yellow);
++            process.exit();
++        });
+ }
+ main();
+ 
+ //
+ // Functions
+ //
+ 
+ /**
+  * Utility
+  */
+ function debug(label, dump) {
+     return console.log(label.cyan, dump);
+ }
+ function error(label, dump) {
+     return console.error(label.red, dump);
+ }
+ 
+ /**
+- * Synchronous
++ * Asynchronous-2 using promises
+  */
+-function syncTask() {
+-    try {
+-        let fileContent = fs.readFileSync('links.json', 'utf-8');
+-
+-        debug('fileContent', fileContent);
+-
+-        let jsonContent = JSON.parse(fileContent);
+-
+-        debug('jsonContent', jsonContent);
++function asyncTask2() {
++    return fs.readFileAsync('links.json', 'utf-8')
++        .then(fileContent => {
++            debug('fileContent', fileContent);
++
++            return JSON.parse(fileContent);
++        })
++
++        .then(jsonContent => {
++            debug('jsonContent', jsonContent);
++
++            return Promise.all(jsonContent.map(item => {
++                debug('loading item', item);
++                return request.get(item)
++                    .then(httpResponse => {
++                        return httpResponse.substr(0, 10);
++                    });
++            }));
++        })
++
++        .then(httpContent => {
++            debug('httpContent', httpContent);
++
++            return mongodb.MongoClient.connect('mongodb://127.0.0.1:27017/local')
++                .then(db => {
++                    return db.collection('values').insertOne({
++                        value: httpContent
++                    });
++                });
++        })
++
++        .then(dbContent => {
++            debug('dbContent', dbContent.ops);
++        })
+ 
+-        let httpContent = jsonContent.map(function (item) {
+-            debug('loading item', item);
+-            let httpResponse = request('GET', item).getBody('utf-8');
+-            return httpResponse.substr(0, 10);
++        .catch(anyError => {
++            error('anyError', anyError);
+         });
+-
+-        debug('httpContent', httpContent);
+-
+-        let dbServer = new mongodb.Server('127.0.0.1');
+-        let dbContent = dbServer.db('local').getCollection('values').insert({
+-            value: httpContent
+-        });
+-
+-        debug('dbContent', dbContent.ops);
+-    }
+-    catch (anyError) {
+-        error('anyError', anyError);
+-    }
+ }
