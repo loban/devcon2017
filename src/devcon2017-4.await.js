@@ -15,14 +15,14 @@ const mongodb = require('mongodb');
 // Main
 //
 async function main() {
-  console.log('--------------'.green);
-  console.log('ASYNCHRONOUS-3'.green);
-  console.log('--------------'.green);
+    console.log('--------------'.green);
+    console.log('ASYNCHRONOUS-3'.green);
+    console.log('--------------'.green);
 
-  console.time('ASYNCHRONOUS-3'.yellow);
-  await asyncTask3();
-  console.timeEnd('ASYNCHRONOUS-3'.yellow);
-  process.exit();
+    console.time('ASYNCHRONOUS-3'.yellow);
+    await asyncTask3();
+    console.timeEnd('ASYNCHRONOUS-3'.yellow);
+    process.exit();
 }
 main();
 
@@ -34,43 +34,43 @@ main();
  * Utility
  */
 function debug(label, dump) {
-  return console.log(label.cyan, dump);
+    return console.log(label.cyan, dump);
 }
 function error(label, dump) {
-  return console.error(label.red, dump);
+    return console.error(label.red, dump);
 }
 
 /**
  * Asynchronous-3 using async/await
  */
 async function asyncTask3() {
-  try {
-    let fileContent = await fs.readFileAsync('links.json', 'utf-8');
+    try {
+        let fileContent = await fs.readFileAsync('links.json', 'utf-8');
 
-    debug('fileContent', fileContent);
+        debug('fileContent', fileContent);
 
-    let jsonContent = JSON.parse(fileContent);
+        let jsonContent = JSON.parse(fileContent);
 
-    debug('jsonContent', jsonContent);
+        debug('jsonContent', jsonContent);
 
-    let httpContent = await Promise.all(
-      jsonContent.map(async item => {
-        debug('loading item', item);
-        let httpResponse = await request.get(item);
-        return httpResponse.substr(0, 10);
-      })
-    );
+        let httpContent = await Promise.all(
+            jsonContent.map(async item => {
+                debug('loading item', item);
+                let httpResponse = await request.get(item);
+                return httpResponse.substr(0, 10);
+            })
+        );
 
-    debug('httpContent', httpContent);
+        debug('httpContent', httpContent);
 
-    let db = await mongodb.MongoClient.connect('mongodb://127.0.0.1:27017/local');
-    let dbContent = await db.collection('values').insertOne({
-      value: httpContent
-    });
+        let db = await mongodb.MongoClient.connect('mongodb://127.0.0.1:27017/local');
+        let dbContent = await db.collection('values').insertOne({
+            value: httpContent
+        });
 
-    debug('dbContent', dbContent.ops);
-  }
-  catch (anyError) {
-    error('anyError', anyError);
-  }
+        debug('dbContent', dbContent.ops);
+    }
+    catch (anyError) {
+        error('anyError', anyError);
+    }
 }

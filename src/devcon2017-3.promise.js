@@ -15,16 +15,16 @@ const mongodb = require('mongodb');
 // Main
 //
 function main() {
-  console.log('--------------'.green);
-  console.log('ASYNCHRONOUS-2'.green);
-  console.log('--------------'.green);
+    console.log('--------------'.green);
+    console.log('ASYNCHRONOUS-2'.green);
+    console.log('--------------'.green);
 
-  console.time('ASYNCHRONOUS-2'.yellow);
-  asyncTask2()
-    .then(() => {
-      console.timeEnd('ASYNCHRONOUS-2'.yellow);
-      process.exit();
-    });
+    console.time('ASYNCHRONOUS-2'.yellow);
+    asyncTask2()
+        .then(() => {
+            console.timeEnd('ASYNCHRONOUS-2'.yellow);
+            process.exit();
+        });
 }
 main();
 
@@ -36,51 +36,51 @@ main();
  * Utility
  */
 function debug(label, dump) {
-  return console.log(label.cyan, dump);
+    return console.log(label.cyan, dump);
 }
 function error(label, dump) {
-  return console.error(label.red, dump);
+    return console.error(label.red, dump);
 }
 
 /**
  * Asynchronous-2 using promises
  */
 function asyncTask2() {
-  return fs.readFileAsync('links.json', 'utf-8')
-    .then(fileContent => {
-      debug('fileContent', fileContent);
+    return fs.readFileAsync('links.json', 'utf-8')
+        .then(fileContent => {
+            debug('fileContent', fileContent);
 
-      return JSON.parse(fileContent);
-    })
+            return JSON.parse(fileContent);
+        })
 
-    .then(jsonContent => {
-      debug('jsonContent', jsonContent);
+        .then(jsonContent => {
+            debug('jsonContent', jsonContent);
 
-      return Promise.all(jsonContent.map(item => {
-        debug('loading item', item);
-        return request.get(item)
-          .then(httpResponse => {
-            return httpResponse.substr(0, 10);
-          });
-      }));
-    })
+            return Promise.all(jsonContent.map(item => {
+                debug('loading item', item);
+                return request.get(item)
+                    .then(httpResponse => {
+                        return httpResponse.substr(0, 10);
+                    });
+            }));
+        })
 
-    .then(httpContent => {
-      debug('httpContent', httpContent);
+        .then(httpContent => {
+            debug('httpContent', httpContent);
 
-      return mongodb.MongoClient.connect('mongodb://127.0.0.1:27017/local')
-        .then(db => {
-          return db.collection('values').insertOne({
-            value: httpContent
-          });
+            return mongodb.MongoClient.connect('mongodb://127.0.0.1:27017/local')
+                .then(db => {
+                    return db.collection('values').insertOne({
+                        value: httpContent
+                    });
+                });
+        })
+
+        .then(dbContent => {
+            debug('dbContent', dbContent.ops);
+        })
+
+        .catch(anyError => {
+            error('anyError', anyError);
         });
-    })
-
-    .then(dbContent => {
-      debug('dbContent', dbContent.ops);
-    })
-
-    .catch(anyError => {
-      error('anyError', anyError);
-    });
 }
