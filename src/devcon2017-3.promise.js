@@ -14,6 +14,7 @@ const mongodb = require('mongodb');
 //
 // Main
 //
+
 function main() {
     console.log('--------------'.green);
     console.log('ASYNCHRONOUS-2'.green);
