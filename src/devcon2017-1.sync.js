@@ -54,9 +54,9 @@ function syncTask() {
     debug('jsonContent', jsonContent);
 
     let httpContent = jsonContent.map(function (item) {
-      debug('loading item', item.url);
-      let httpResponse = request('GET', item.url).getBody('utf-8');
-      return httpResponse.substr(item.position, item.length);
+      debug('loading item', item);
+      let httpResponse = request('GET', item).getBody('utf-8');
+      return httpResponse.substr(0, 10);
     });
 
     debug('httpContent', httpContent);
