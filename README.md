@@ -1,6 +1,9 @@
 Please *Wait*, I *Promise* to Rid you of *Callback* Hell
 ========================================================
 
+This code was used during my talk at BASIS SoftExpo Developers Conference 2017.
+You can find the slides [here](slides), but the meat is in the code.
+
 NodeJS development involves many tasks that 'block IO'.
 Since NodeJS is single threaded, things can easily get bogged down by the following.
 
